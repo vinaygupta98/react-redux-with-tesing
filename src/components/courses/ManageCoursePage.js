@@ -1,20 +1,14 @@
 import PropTypes from "prop-types";
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { newCourse } from "../../../tools/mockData";
 import { loadAuthors } from "../../redux/actions/authorActions";
-import {
-  loadCourses,
-  saveCourse,
-} from "../../redux/actions/courseActions";
+import { loadCourses, saveCourse } from "../../redux/actions/courseActions";
 import CourseForm from "./CourseForm";
 import Spinner from "../common/Spinner";
 import { toast } from "react-toastify";
 
-export const ManageCoursePage = ({
+const ManageCoursePage = ({
   courses,
   authors,
   loadAuthors,
@@ -23,72 +17,43 @@ export const ManageCoursePage = ({
   history,
   ...props
 }) => {
-  const [course, setCourse] =
-    useState({
-      ...props.course,
-    });
-  const [errors, setErrors] =
-    useState({});
-  const [saving, setSaving] =
-    useState(false);
+  const [course, setCourse] = useState({
+    ...props.course,
+  });
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
-    if (
-      courses.length === 0
-    ) {
-      loadCourses().catch(
-        (error) => {
-          alert(
-            "Loading courses failed " +
-            error
-          );
-        }
-      );
+    if (courses.length === 0) {
+      loadCourses().catch((error) => {
+        alert("Loading courses failed " + error);
+      });
     } else {
       setCourse({
         ...props.course,
       });
     }
-    if (
-      authors.length === 0
-    ) {
-      loadAuthors().catch(
-        (error) => {
-          alert(
-            "Loading auhtors failed " +
-            error
-          );
-        }
-      );
+    if (authors.length === 0) {
+      loadAuthors().catch((error) => {
+        alert("Loading auhtors failed " + error);
+      });
     }
   }, [props.course]);
-  function handleChange(
-    event
-  ) {
-    const { name, value } =
-      event.target;
-    setCourse(
-      (prevCourse) => ({
-        ...prevCourse,
-        [name]:
-          name === "authorId"
-            ? parseInt(
-              value,
-              10
-            )
-            : value,
-      })
-    );
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setCourse((prevCourse) => ({
+      ...prevCourse,
+      [name]: name === "authorId" ? parseInt(value, 10) : value,
+    }));
   }
   function formIsValid() {
     const { title, authorId, category } = course;
-    const errors = {}
-    if (!title) errors.title = "Title is required."
-    if (!authorId) errors.author = "Auhtor is required."
-    if (!category) errors.category = "Category is required."
-    setErrors(errors)
+    const errors = {};
+    if (!title) errors.title = "Title is required.";
+    if (!authorId) errors.author = "Auhtor is required.";
+    if (!category) errors.category = "Category is required.";
+    setErrors(errors);
     // Form is valid if the errors object still has no properties
-    return Object.keys(errors).length === 0
-
+    return Object.keys(errors).length === 0;
   }
   function handleSave(event) {
     event.preventDefault();
@@ -96,21 +61,15 @@ export const ManageCoursePage = ({
     setSaving(true);
     saveCourse(course)
       .then(() => {
-        toast.success(
-          "Course Saved."
-        );
-        history.push(
-          "/courses"
-        );
+        toast.success("Course Saved.");
+        history.push("/courses");
       })
       .catch((error) => {
         setSaving(false);
-        setErrors({ onSave: error.message })
+        setErrors({ onSave: error.message });
       });
   }
-  return authors.length ===
-    0 ||
-    courses.length === 0 ? (
+  return authors.length === 0 || courses.length === 0 ? (
     <Spinner />
   ) : (
     <CourseForm
@@ -124,48 +83,22 @@ export const ManageCoursePage = ({
   );
 };
 ManageCoursePage.prototype = {
-  courses:
-    PropTypes.array
-      .isRequired,
-  authors:
-    PropTypes.array
-      .isRequired,
-  loadAuthors:
-    PropTypes.func.isRequired,
-  loadCourses:
-    PropTypes.func.isRequired,
-  saveCourse:
-    PropTypes.func.isRequired,
-  history:
-    PropTypes.object
-      .isRequired,
+  courses: PropTypes.array.isRequired,
+  authors: PropTypes.array.isRequired,
+  loadAuthors: PropTypes.func.isRequired,
+  loadCourses: PropTypes.func.isRequired,
+  saveCourse: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
 };
-const getCourseBySlug = (
-  courses,
-  slug
-) => {
-  return (
-    courses.find(
-      (course) =>
-        course.slug === slug
-    ) || null
-  );
+const getCourseBySlug = (courses, slug) => {
+  return courses.find((course) => course.slug === slug) || null;
 };
 
-function mapStateProps(
-  state,
-  ownProps
-) {
-  const slug =
-    ownProps.match.params
-      .slug;
+function mapStateProps(state, ownProps) {
+  const slug = ownProps.match.params.slug;
   const course =
-    slug &&
-      state.courses.length > 0
-      ? getCourseBySlug(
-        state.courses,
-        slug
-      )
+    slug && state.courses.length > 0
+      ? getCourseBySlug(state.courses, slug)
       : newCourse;
   return {
     course,
@@ -179,7 +112,4 @@ const mapDispatchProps = {
   saveCourse,
 };
 
-export default connect(
-  mapStateProps,
-  mapDispatchProps
-)(ManageCoursePage);
+export default connect(mapStateProps, mapDispatchProps)(ManageCoursePage);
